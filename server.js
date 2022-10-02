@@ -27,10 +27,17 @@ app.listen(3000, () => {
 
 app.get('/api/plants/:id', async (req, res) => {
     const { id } = req.params;
-    const plant = await Plant.findOne({ where: { creatorId: id } });
+    const plant = await Plant.findOne({ where: { id } });
     if (plant) {
         res.send(plant);
     } else {
         res.status(404).send({ message: 'no id' });
     }
+});
+
+app.post('/api/plants', async (req, res) => {
+    const newPlant = req.body;
+    const plant = Plant.build(newPlant);
+    await plant.save();
+    res.send(plant);
 });
