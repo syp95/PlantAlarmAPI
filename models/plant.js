@@ -13,6 +13,12 @@ module.exports = (sequelize, DataTypes) => {
     }
     Plant.init(
         {
+            id: {
+                allowNull: false,
+                autoIncrement: true,
+                primaryKey: true,
+                type: DataTypes.INTEGER,
+            },
             plantName: DataTypes.STRING,
             wateringDate: DataTypes.STRING,
             lastWateringDate: DataTypes.DATE,
