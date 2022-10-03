@@ -1,10 +1,11 @@
 const express = require('express');
 
 const app = express();
-
+const jwt = require('jsonwebtoken');
+const SECRET = 'SECRET';
 const db = require('./models');
 
-const { Plant } = db;
+const { Plant, User } = db;
 
 app.use(express.json());
 
@@ -19,10 +20,6 @@ app.get('/api/plants', async (req, res) => {
     }
     const plants = await Plant.findAll();
     res.send(plants);
-});
-
-app.listen(3000, () => {
-    console.log('Server on');
 });
 
 app.get('/api/plants/:id', async (req, res) => {
@@ -60,4 +57,53 @@ app.delete('/api/plants/:id', async (req, res) => {
     } else {
         res.status(404).send({ message: 'no id' });
     }
+});
+
+app.get('/api/id', async (req, res) => {
+    const id = await User.findAll();
+    res.send(id);
+});
+
+app.post('/api/login', async (req, res) => {
+    const { userid, userpassword, username } = req.body;
+    const userCount = await User.count({ where: { userid, userpassword } });
+
+    if (userCount === 1) {
+        const token = jwt.sign(
+            {
+                username,
+            },
+            SECRET,
+            {
+                algorithm: 'HS256',
+                expiresIn: '10m',
+            },
+        );
+        res.status(200).json({ status: true, token });
+    } else {
+        res.status(401).json({ status: false, result: 'login fail' });
+    }
+});
+
+app.post('/api/register', async (req, res) => {
+    const { userid, userpassword, username } = req.body;
+    const userCount = await User.count({ where: { userid, userpassword } });
+
+    if (userCount > 0) {
+        res.status(401).json({
+            status: false,
+            result: 'username already exist',
+        });
+    } else {
+        User.create({
+            userid,
+            userpassword,
+            username,
+        });
+        res.status(200).json({ status: true, result: 'register success' });
+    }
+});
+
+app.listen(3000, () => {
+    console.log('Server on');
 });

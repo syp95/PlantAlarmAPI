@@ -19,3 +19,28 @@ Content-Type: application/json
 {
     "plantName": "Night"
 }
+
+###
+DELETE http://localhost:3000/api/plants/2
+
+###
+POST http://localhost:3000/api/register
+Content-Type: application/json
+
+{
+    "userid": "Day@naver.com",
+    "userpassword": "12324234",
+    "username": "SYP"    
+}
+
+###
+POST http://localhost:3000/api/login
+Content-Type: application/json
+
+{
+    "userid": "Day@naver.com",
+    "userpassword": "12324234"
+}
+
+###
+GET http://localhost:3000/api/id
