@@ -3,25 +3,29 @@ const router = require('express').Router();
 const db = require('../models');
 
 const { User } = db;
+const { verifyToken } = require('../middlewares');
 
 const jwt = require('jsonwebtoken');
-const SECRET = 'SECRET';
+require('dotenv').config();
 
-router.get('/id', async (req, res) => {
+router.get('/id', verifyToken, async (req, res) => {
     const id = await User.findAll();
     res.send(id);
 });
 
 router.post('/login', async (req, res) => {
     const { userid, userpassword, username } = req.body;
-    const userCount = await User.count({ where: { userid, userpassword } });
+    const userCount = await User.count({
+        where: { userid, userpassword },
+    });
 
     if (userCount === 1) {
         const token = jwt.sign(
             {
+                userid,
                 username,
             },
-            SECRET,
+            process.env.JWT_SECRET,
             {
                 algorithm: 'HS256',
                 expiresIn: '10m',

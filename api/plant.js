@@ -1,5 +1,6 @@
 const router = require('express').Router();
 
+const { verifyToken } = require('../middlewares');
 const db = require('../models');
 
 const { Plant } = db;
