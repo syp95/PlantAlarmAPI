@@ -28,7 +28,7 @@ router.post('/login', async (req, res) => {
             process.env.JWT_SECRET,
             {
                 algorithm: 'HS256',
-                expiresIn: '10m',
+                expiresIn: '15m',
             },
         );
         res.status(200).json({ status: true, token });

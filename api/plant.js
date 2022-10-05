@@ -1,9 +1,27 @@
 const router = require('express').Router();
 
+const multer = require('multer');
 const { verifyToken } = require('../middlewares');
+
 const db = require('../models');
 
 const { Plant } = db;
+
+const upload = multer({
+    storage: multer.diskStorage({
+        destination(req, file, done) {
+            done(null, 'uploads/');
+        },
+        filename(req, file, done) {
+            const ext = path.extname(file.originalname);
+            done(
+                null,
+                path.basename(file.originalname, ext) + Date.now() + ext,
+            );
+        },
+    }),
+    limits: { fileSize: 5 * 1024 * 1024 },
+});
 
 router.get('/', async (req, res) => {
     const { creator } = req.query;
@@ -18,9 +36,12 @@ router.get('/', async (req, res) => {
     res.send(plants);
 });
 
-router.get('/:id', async (req, res) => {
+router.get('/:id', verifyToken, async (req, res) => {
     const { id } = req.params;
-    const plant = await Plant.findOne({ where: { id } });
+    const plant = await Plant.findOne.findAll({
+        where: { creatorId: id },
+        order: [['createdAt', 'DESC']],
+    });
     if (plant) {
         res.send(plant);
     } else {
@@ -28,8 +49,14 @@ router.get('/:id', async (req, res) => {
     }
 });
 
-router.post('/', async (req, res) => {
+router.post('/', upload.single('image'), async (req, res) => {
     const newPlant = req.body;
+    const image = req.file;
+    if (image) {
+        newPlant.imageUrl = image.path;
+    } else {
+        newPlant.imageUrl = 'defaultImage';
+    }
     const plant = await Plant.create(newPlant);
     res.send(plant);
 });

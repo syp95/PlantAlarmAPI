@@ -5,7 +5,7 @@ POST http://localhost:3000/api/plants
 Content-Type: application/json
 
 {
-    "plantName": "Day",
+    "plantName": "Day2",
     "wateringDate": "14",
     "lastWateringDate": "2022/09/30",
     "creatorId": "J",
