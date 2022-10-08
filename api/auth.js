@@ -8,7 +8,7 @@ const { verifyToken } = require('../middlewares');
 const jwt = require('jsonwebtoken');
 require('dotenv').config();
 
-router.get('/id', verifyToken, async (req, res) => {
+router.get('/id', async (req, res) => {
     const id = await User.findAll();
     res.send(id);
 });
@@ -28,10 +28,10 @@ router.post('/login', async (req, res) => {
             process.env.JWT_SECRET,
             {
                 algorithm: 'HS256',
-                expiresIn: '15m',
+                expiresIn: '30m',
             },
         );
-        res.status(200).json({ status: true, token });
+        res.status(200).json({ status: true, token, userid });
     } else {
         res.status(401).json({ status: false, result: 'login fail' });
     }
