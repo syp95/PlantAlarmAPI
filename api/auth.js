@@ -9,11 +9,9 @@ const authJWT = require('../middlewares/jwt-auth');
 const redisClient = require('../middlewares/redis');
 const refresh = require('../middlewares/jwt-refresh');
 
-require('dotenv').config();
-
 router.get('/id/:id', authJWT, async (req, res) => {
-    const userid = param.id;
-    const user = await User.findOne({ where: { userid } });
+    const { id } = req.params;
+    const user = await User.findOne({ where: { userid: id } });
     if (user) {
         res.send(user);
     } else {
@@ -22,12 +20,16 @@ router.get('/id/:id', authJWT, async (req, res) => {
 });
 
 router.post('/login', async (req, res) => {
-    const { userid, userpassword, username } = req.body;
+    const { userid, userpassword } = req.body;
     const userCount = await User.count({
         where: { userid, userpassword },
     });
 
     if (userCount === 1) {
+        const { username } = await User.findOne({
+            where: { userid },
+        });
+
         const accessToken = jwt.sign({ userid, username });
         const refreshToken = jwt.refresh();
 
@@ -35,7 +37,7 @@ router.post('/login', async (req, res) => {
 
         res.status(200).json({
             status: true,
-            data: { accessToken, refreshToken, userid },
+            logindata: { accessToken, refreshToken, userid },
         });
     } else {
         res.status(401).json({ status: false, result: 'login fail' });
@@ -61,6 +63,6 @@ router.post('/register', async (req, res) => {
     }
 });
 
-router.get('/refresh', refresh);
+router.post('/refresh', refresh);
 
 module.exports = router;

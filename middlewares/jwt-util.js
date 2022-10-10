@@ -1,12 +1,14 @@
 const { promisify } = require('util');
 const jwt = require('jsonwebtoken');
 const redisClient = require('./redis');
-const secret = process.env.SECRET;
+
+require('dotenv').config();
+const secret = process.env.JWT_SECRET;
 
 module.exports = {
     sign: (user) => {
         const payload = {
-            id: user.id,
+            id: user.userid,
             role: user.username,
         };
 
