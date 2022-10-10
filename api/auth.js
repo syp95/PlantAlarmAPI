@@ -3,13 +3,15 @@ const router = require('express').Router();
 const db = require('../models');
 
 const { User } = db;
-const { verifyToken } = require('../middlewares/jwt-util');
+
 const jwt = require('../middlewares/jwt-util');
+const authJWT = require('../middlewares/jwt-auth');
 const redisClient = require('../middlewares/redis');
+const refresh = require('../middlewares/jwt-refresh');
 
 require('dotenv').config();
 
-router.get('/id/:id', verifyToken, async (req, res) => {
+router.get('/id/:id', authJWT, async (req, res) => {
     const userid = param.id;
     const user = await User.findOne({ where: { userid } });
     if (user) {
@@ -58,5 +60,7 @@ router.post('/register', async (req, res) => {
         res.status(200).json({ status: true, result: 'register success' });
     }
 });
+
+router.get('/refresh', refresh);
 
 module.exports = router;
