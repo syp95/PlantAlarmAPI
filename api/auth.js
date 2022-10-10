@@ -3,14 +3,20 @@ const router = require('express').Router();
 const db = require('../models');
 
 const { User } = db;
-const { verifyToken } = require('../middlewares');
+const { verifyToken } = require('../middlewares/jwt-util');
+const jwt = require('../middlewares/jwt-util');
+const redisClient = require('../middlewares/redis');
 
-const jwt = require('jsonwebtoken');
 require('dotenv').config();
 
-router.get('/id', async (req, res) => {
-    const id = await User.findAll();
-    res.send(id);
+router.get('/id/:id', verifyToken, async (req, res) => {
+    const userid = param.id;
+    const user = await User.findOne({ where: { userid } });
+    if (user) {
+        res.send(user);
+    } else {
+        res.status(401).json({ status: false, result: 'no ID' });
+    }
 });
 
 router.post('/login', async (req, res) => {
@@ -20,18 +26,15 @@ router.post('/login', async (req, res) => {
     });
 
     if (userCount === 1) {
-        const token = jwt.sign(
-            {
-                userid,
-                username,
-            },
-            process.env.JWT_SECRET,
-            {
-                algorithm: 'HS256',
-                expiresIn: '30m',
-            },
-        );
-        res.status(200).json({ status: true, token, userid });
+        const accessToken = jwt.sign({ userid, username });
+        const refreshToken = jwt.refresh();
+
+        redisClient.set(userid, refreshToken);
+
+        res.status(200).json({
+            status: true,
+            data: { accessToken, refreshToken, userid },
+        });
     } else {
         res.status(401).json({ status: false, result: 'login fail' });
     }

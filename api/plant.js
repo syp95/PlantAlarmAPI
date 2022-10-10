@@ -1,7 +1,7 @@
 const router = require('express').Router();
 
 const multer = require('multer');
-const { verifyToken } = require('../middlewares');
+const { verifyToken } = require('../middlewares/jwt-util');
 
 const db = require('../models');
 
@@ -38,7 +38,7 @@ router.get('/', async (req, res) => {
 
 router.get('/:id', verifyToken, async (req, res) => {
     const { id } = req.params;
-    const plant = await Plant.findOne.findAll({
+    const plant = await Plant.findAll({
         where: { creatorId: id },
         order: [['createdAt', 'DESC']],
     });
