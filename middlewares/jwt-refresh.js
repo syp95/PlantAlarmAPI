@@ -30,7 +30,7 @@ const refresh = async (req, res) => {
 
                 res.status(200).send({
                     ok: true,
-                    data: {
+                    logindata: {
                         accessToken: newAccessToken,
                         refreshToken,
                     },

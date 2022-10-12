@@ -2,7 +2,19 @@ const express = require('express');
 const app = express();
 const cors = require('cors');
 
-app.use(express.json());
+app.use(
+    express.json({
+        limit: '50mb',
+    }),
+);
+
+app.use(
+    express.urlencoded({
+        limit: '50mb',
+        extended: false,
+    }),
+);
+
 app.use(cors());
 
 const auth = require('./api/auth.js');

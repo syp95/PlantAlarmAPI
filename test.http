@@ -1,4 +1,4 @@
-GET http://localhost:3000/api/plants
+GET http://localhost:3001/api/plants
 
 ###
 POST http://localhost:3000/api/plants

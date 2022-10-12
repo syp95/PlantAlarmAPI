@@ -2,26 +2,10 @@ const router = require('express').Router();
 
 const multer = require('multer');
 const authJWT = require('../middlewares/jwt-auth');
-
+const path = require('path');
 const db = require('../models');
 
 const { Plant } = db;
-
-const upload = multer({
-    storage: multer.diskStorage({
-        destination(req, file, done) {
-            done(null, 'uploads/');
-        },
-        filename(req, file, done) {
-            const ext = path.extname(file.originalname);
-            done(
-                null,
-                path.basename(file.originalname, ext) + Date.now() + ext,
-            );
-        },
-    }),
-    limits: { fileSize: 5 * 1024 * 1024 },
-});
 
 router.get('/', async (req, res) => {
     const { creator } = req.query;
@@ -49,16 +33,30 @@ router.get('/:id', authJWT, async (req, res) => {
     }
 });
 
-router.post('/', upload.single('image'), async (req, res) => {
+router.post('/', async (req, res) => {
     const newPlant = req.body;
-    const image = req.file;
-    if (image) {
-        newPlant.imageUrl = image.path;
-    } else {
-        newPlant.imageUrl = 'defaultImage';
-    }
+
     const plant = await Plant.create(newPlant);
     res.send(plant);
+});
+
+const upload = multer({
+    storage: multer.diskStorage({
+        destination: './uploads/img/',
+        filename(req, file, done) {
+            const ext = path.extname(file.originalname);
+            done(
+                null,
+                path.basename(file.originalname, ext) + Date.now() + ext,
+            );
+        },
+    }),
+    limits: { fileSize: 5 * 1024 * 1024 },
+});
+
+router.post('/images', upload.single('image'), async (req, res) => {
+    console.log(req.file);
+    res.send({ fileName: req.file.filename });
 });
 
 router.put('/:id', async (req, res) => {
