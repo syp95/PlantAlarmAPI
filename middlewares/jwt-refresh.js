@@ -2,13 +2,13 @@ const { sign, verify, refreshVerify } = require('./jwt-util');
 const jwt = require('jsonwebtoken');
 
 const refresh = async (req, res) => {
-    if (req.headers.authorization && req.headers.refresh) {
+    if (req.headers.authorization && req.cookies.refresh) {
         const authToken = req.headers.authorization.split('Bearer ')[1];
-        const refreshToken = req.headers.refresh;
+        const refreshToken = req.cookies.refresh;
 
         const authResult = verify(authToken);
 
-        const decoded = jwt.decode(authToken);
+        const decoded = jwt.decode(authToken, { complete: true });
 
         if (decoded === null) {
             res.status(401).send({
@@ -17,7 +17,9 @@ const refresh = async (req, res) => {
             });
         }
 
-        const refreshResult = refreshVerify(refreshToken, decoded.id);
+        const userid = decoded.payload.id;
+
+        const refreshResult = refreshVerify(refreshToken, userid);
 
         if (authResult.ok === false && authResult.message === 'jwt expired') {
             if (refreshResult.ok === false) {
@@ -27,12 +29,11 @@ const refresh = async (req, res) => {
                 });
             } else {
                 const newAccessToken = sign(user);
-
+                res.cookie('refresh', refresh, { httpOnly: true });
                 res.status(200).send({
                     ok: true,
                     logindata: {
                         accessToken: newAccessToken,
-                        refreshToken,
                     },
                 });
             }

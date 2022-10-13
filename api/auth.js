@@ -12,6 +12,7 @@ const refresh = require('../middlewares/jwt-refresh');
 router.get('/id/:id', authJWT, async (req, res) => {
     const { id } = req.params;
     const user = await User.findOne({ where: { userid: id } });
+
     if (user) {
         res.send(user);
     } else {
@@ -35,9 +36,12 @@ router.post('/login', async (req, res) => {
 
         redisClient.set(userid, refreshToken);
 
+        res.cookie('refresh', refreshToken, { httpOnly: true });
+
         res.status(200).json({
             status: true,
-            logindata: { accessToken, refreshToken, userid },
+            result: 'login success',
+            logindata: { accessToken, userid },
         });
     } else {
         res.status(401).json({ status: false, result: 'login fail' });
