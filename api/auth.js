@@ -48,6 +48,22 @@ router.post('/login', async (req, res) => {
     }
 });
 
+router.post('/logout', async (req, res) => {
+    const refreshToken = req.cookies['refresh'];
+
+    if (refreshToken) {
+        res.clearCookie('refresh', {
+            httpOnly: true,
+        });
+    }
+
+    res.status(200).json({
+        status: true,
+        result: 'logout success',
+        logoutdata: { accessToken: '' },
+    });
+});
+
 router.post('/register', async (req, res) => {
     const { userid, userpassword, username } = req.body;
     const userCount = await User.count({ where: { userid, userpassword } });
