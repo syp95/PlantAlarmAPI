@@ -21,7 +21,7 @@ Content-Type: application/json
 }
 
 ###
-DELETE http://localhost:3000/api/plants/2
+DELETE http://localhost:3001/api/plants/20
 
 ###
 POST http://localhost:3000/api/auth/register

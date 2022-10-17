@@ -20,7 +20,7 @@ router.get('/', async (req, res) => {
     res.send(plants);
 });
 
-router.get('/:id', authJWT, async (req, res) => {
+router.get('/id/:id', authJWT, async (req, res) => {
     const { id } = req.params;
     const plant = await Plant.findAll({
         where: { creatorId: id },
@@ -33,7 +33,7 @@ router.get('/:id', authJWT, async (req, res) => {
     }
 });
 
-router.post('/', async (req, res) => {
+router.post('/', authJWT, async (req, res) => {
     const newPlant = req.body;
 
     const plant = await Plant.create(newPlant);
@@ -55,11 +55,10 @@ const upload = multer({
 });
 
 router.post('/images', upload.single('image'), async (req, res) => {
-    console.log(req.file);
     res.send({ fileName: req.file.filename });
 });
 
-router.put('/:id', async (req, res) => {
+router.put('/:id', authJWT, async (req, res) => {
     const { id } = req.params;
     const newInfo = req.body;
     const result = await Plant.update(newInfo, { where: { id } });
@@ -69,6 +68,8 @@ router.put('/:id', async (req, res) => {
         res.status(404).send({ message: 'no id' });
     }
 });
+
+//물준 날짜 기록 put 추가
 
 router.delete('/:id', async (req, res) => {
     const { id } = req.params;
