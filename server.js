@@ -34,6 +34,9 @@ app.use('/api/auth', auth);
 const plant = require('./api/plant.js');
 app.use('/api/plants', plant);
 
+const notification = require('./api/notification.js');
+app.use('/api/notification/', notification);
+
 app.listen(3001, () => {
     console.log('Server on');
 });

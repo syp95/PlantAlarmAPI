@@ -71,7 +71,7 @@ router.put('/:id', authJWT, async (req, res) => {
 
 //물준 날짜 기록 put 추가
 
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', authJWT, async (req, res) => {
     const { id } = req.params;
     const deletedCount = await Plant.destroy({ where: { id } });
     if (deletedCount) {

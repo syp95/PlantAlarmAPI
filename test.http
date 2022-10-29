@@ -1,15 +1,16 @@
 GET http://localhost:3001/api/plants
 
 ###
-POST http://localhost:3000/api/plants
+POST http://localhost:3001/api/plants
 Content-Type: application/json
 
 {
+    "id":1,
     "plantName": "Day5",
     "wateringDate": "14",
     "lastWateringDate": "2022/09/30",
-    "creatorId": "J",
-    "imageUrl": "image3.png"
+    "creatorId": "sy95_055@naver.com",
+    "imageUrl": "http://localhost:3001/uploads/img/plant11666010660003.png"
 }
 
 ###
@@ -21,7 +22,7 @@ Content-Type: application/json
 }
 
 ###
-DELETE http://localhost:3001/api/plants/20
+DELETE http://localhost:3001/api/plants/32
 
 ###
 POST http://localhost:3000/api/auth/register
