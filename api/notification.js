@@ -3,7 +3,7 @@ const { scheduleJob } = require('node-schedule');
 const webpush = require('web-push');
 const db = require('../models');
 
-const { User } = db;
+const { Notification } = db;
 
 const SUBJECT = '';
 const VAPID_PUBLIC = '';
@@ -15,32 +15,38 @@ router.get('/vapid', (req, res) => {
     res.send(VAPID_PUBLIC);
 });
 
+router.get('/subscription/:id', async (req, res) => {
+    const { id } = req.params;
+    const subscription = await Notification.findOne({ where: { userid: id } });
+
+    res.send(subscription);
+});
+
 router.post('/subscription', async (req, res) => {
-    const { userId, subscription } = req.body;
+    const { userid, subscription } = req.body;
+    const subCount = await Notification.count({ where: { userid } });
 
-    const index = store.data.findIndex((data) => data.userId === userId);
-    if (~index) store.data[index].subscription = subscription;
-
-    store.data.push({ userId, subscription });
-    const data = JSON.stringify(store.data);
-
-    if (data) {
-        res.send(data);
+    if (subCount > 0) {
+        res.status(401).json({
+            status: false,
+            result: 'subscription already exist',
+        });
+    } else {
+        Notification.create({
+            userid,
+            subscription,
+        });
+        res.status(200).json({ status: true, result: 'register success' });
     }
 });
 
-router.delete('/subscription', (req, res) => {
-    const { userId } = req.body;
-
-    const index = store.data.findIndex((data) => data.userId === userId);
-    if (~index) {
-        store.data.splice(index, 1);
-    }
-
-    const data = JSON.stringify(store.data);
-
-    if (data) {
-        res.send(data);
+router.delete('/subscription/:id', async (req, res) => {
+    const { id } = req.params;
+    const deletedCount = await Notification.destroy({ where: { id } });
+    if (deletedCount) {
+        res.send({ message: `${deletedCount} row deleted` });
+    } else {
+        res.status(404).send({ message: 'no id' });
     }
 });
 
@@ -76,3 +82,5 @@ router.post('/send-push-notification', (req, res) => {
         res.status(404).end();
     }
 });
+
+module.exports = router;
