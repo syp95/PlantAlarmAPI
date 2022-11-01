@@ -1,16 +1,19 @@
 GET http://localhost:3001/api/plants
 
 ###
-GET http://localhost:3001/api/notification  
+GET http://localhost:3001/api/notification/subscription/
 
 ###
-POST http://localhost:3001/api/notification  
+POST http://localhost:3001/api/notification/subscription  
 Content-Type: application/json
 
 {
     
-    "userid": "Day5",
-    "subscription": "{"1":"1", "2":"2"}",
+    "userid": "Day7",
+    "subscription": {
+        "5":"1",
+        "2":"3"
+    }
     
 }
 ###

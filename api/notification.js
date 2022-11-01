@@ -15,11 +15,20 @@ router.get('/vapid', (req, res) => {
     res.send(VAPID_PUBLIC);
 });
 
+router.get('/subscription', async (req, res) => {
+    const subscription = await Notification.findAll();
+
+    res.status(200).send(subscription);
+});
+
 router.get('/subscription/:id', async (req, res) => {
     const { id } = req.params;
     const subscription = await Notification.findOne({ where: { userid: id } });
-
-    res.send(subscription);
+    if (subscription) {
+        res.status(200).send(subscription);
+    } else {
+        res.status(401);
+    }
 });
 
 router.post('/subscription', async (req, res) => {
@@ -50,12 +59,12 @@ router.delete('/subscription/:id', async (req, res) => {
     }
 });
 
-router.post('/send-push-notification', (req, res) => {
+router.post('/send-push-notification', async (req, res) => {
     const { targetId: targetUserId, message, date } = req.body ?? {};
 
-    const targetUser = store.data
-        .reverse()
-        .find(({ userId }) => userId === targetUserId);
+    const targetUser = await Notification.findOne({
+        where: { userid: targetUserId },
+    });
 
     if (targetUser) {
         const messageData = {
