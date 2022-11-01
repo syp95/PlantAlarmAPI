@@ -4,12 +4,12 @@ const webpush = require('web-push');
 const db = require('../models');
 
 const { Notification } = db;
+require('dotenv').config();
+const SUBJECT = process.env.WEB_PUSH_EMAIL;
+const VAPID_PUBLIC = process.env.WEB_PUSH_PRIVATE_KEY;
+const VAPID_PRIVATE = process.env.WEB_PUSH_PUBLIC_KEY;
 
-const SUBJECT = '';
-const VAPID_PUBLIC = '';
-const VAPID_PRIVATE = '';
-
-const store = { data: [] };
+webPush.setVapidDetails(SUBJECT, VAPID_PUBLIC, VAPID_PRIVATE);
 
 router.get('/vapid', (req, res) => {
     res.send(VAPID_PUBLIC);
@@ -49,13 +49,13 @@ router.post('/subscription', async (req, res) => {
     }
 });
 
-router.delete('/subscription/:id', async (req, res) => {
-    const { id } = req.params;
-    const deletedCount = await Notification.destroy({ where: { id } });
+router.delete('/subscription/:userid', async (req, res) => {
+    const { userid } = req.params;
+    const deletedCount = await Notification.destroy({ where: { userid } });
     if (deletedCount) {
         res.send({ message: `${deletedCount} row deleted` });
     } else {
-        res.status(404).send({ message: 'no id' });
+        res.status(404).send({ message: 'no userid' });
     }
 });
 
