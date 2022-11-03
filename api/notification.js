@@ -68,28 +68,38 @@ router.post('/send-push-notification', async (req, res) => {
     const targetUser = await Notification.findOne({
         where: { userid: targetUserId },
     });
-    console.log(req.body);
+
     if (targetUser) {
         const messageData = {
             title: '식물 알람 | Plant Alarm',
             message,
         };
-        const alarmDate = date; // 날짜로 변환해주기
+        const dateArr = date.split('-'); // 날짜로 변환해주기
+        const alarmDate = new Date(
+            dateArr[0],
+            dateArr[1] - 1,
+            dateArr[2],
+            dateArr[3],
+            dateArr[4],
+            dateArr[5],
+        );
 
-        // scheduleJob(alarmDate, () => {});
-        webpush
-            .sendNotification(
-                targetUser.subscription,
-                JSON.stringify(messageData),
-                { TTL: 3600 * 12 },
-            )
-            .then((pushServiceRes) =>
-                res.status(pushServiceRes.statusCode).end(),
-            )
-            .catch((error) => {
-                logger.error('POST /send-push', { error });
-                res.status(error?.statusCode ?? 500).end();
-            });
+        scheduleJob(alarmDate, () => {
+            console.log('push alarm');
+            webpush
+                .sendNotification(
+                    targetUser.subscription,
+                    JSON.stringify(messageData),
+                    { TTL: 3600 * 12 },
+                )
+                .then((pushServiceRes) =>
+                    res.status(pushServiceRes.statusCode).end(),
+                )
+                .catch((error) => {
+                    logger.error('POST /send-push', { error });
+                    res.status(error?.statusCode ?? 500).end();
+                });
+        });
     } else {
         res.status(404).end();
     }
