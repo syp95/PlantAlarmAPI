@@ -4,10 +4,13 @@ const webpush = require('web-push');
 const db = require('../models');
 
 const { Notification } = db;
+const webPush = require('web-push');
+
 require('dotenv').config();
-const SUBJECT = process.env.WEB_PUSH_EMAIL;
-const VAPID_PUBLIC = process.env.WEB_PUSH_PRIVATE_KEY;
-const VAPID_PRIVATE = process.env.WEB_PUSH_PUBLIC_KEY;
+const SUBJECT = `mailto:${process.env.WEB_PUSH_EMAIL}`;
+const vapidKeys = webPush.generateVAPIDKeys();
+const VAPID_PUBLIC = vapidKeys.publicKey;
+const VAPID_PRIVATE = vapidKeys.privateKey;
 
 webPush.setVapidDetails(SUBJECT, VAPID_PUBLIC, VAPID_PRIVATE);
 
@@ -65,28 +68,28 @@ router.post('/send-push-notification', async (req, res) => {
     const targetUser = await Notification.findOne({
         where: { userid: targetUserId },
     });
-
+    console.log(req.body);
     if (targetUser) {
         const messageData = {
             title: '식물 알람 | Plant Alarm',
-            body: message || '(Empty message)',
+            message,
         };
         const alarmDate = date; // 날짜로 변환해주기
 
-        scheduleJob(alarmDate, () => {
-            webpush
-                .sendNotification(
-                    targetUser.subscription,
-                    JSON.stringify(messageData),
-                )
-                .then((pushServiceRes) =>
-                    res.status(pushServiceRes.statusCode).end(),
-                )
-                .catch((error) => {
-                    logger.error('POST /send-push', { error });
-                    res.status(error?.statusCode ?? 500).end();
-                });
-        });
+        // scheduleJob(alarmDate, () => {});
+        webpush
+            .sendNotification(
+                targetUser.subscription,
+                JSON.stringify(messageData),
+                { TTL: 3600 * 12 },
+            )
+            .then((pushServiceRes) =>
+                res.status(pushServiceRes.statusCode).end(),
+            )
+            .catch((error) => {
+                logger.error('POST /send-push', { error });
+                res.status(error?.statusCode ?? 500).end();
+            });
     } else {
         res.status(404).end();
     }
